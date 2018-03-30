@@ -11,13 +11,31 @@ length = 1000
 alpha = 1
 files_now=os.listdir("data/")
 file_num = len(files_now) + 1
+#device id, hardcoded do not modify
+device_id = 3
+
+
+#check device id
+print("check id now begin")
+correct_url = "http://192.168.1.1"
+for x in range(1,256):
+	correct_url = 'http://192.168.1.'+str(x)
+	try:
+		id_list = urllib.request.urlopen(correct_url).read().split()
+		if int(id_list[0]) == device_id:
+			break
+		else:
+			continue
+	except:
+		continue
+print(correct_url)
 
 namestring = "data/"+str(file_num).zfill(6)
 file = open(namestring,"w")
 t0 = time.time()
 file.seek(0,2)
 counter = 1
-file.write("Date\t Time\t Sensor1\t Sensor2\t Sensor3\t Sensor4\n")
+file.write("Dev_id\t Date\t Time\t Sensor1\t Sensor2\t Sensor3\t Sensor4\n")
 curr = 1
 last = 0
 
@@ -29,7 +47,7 @@ data1=deque()
 # data3=deque()
 # data4=deque()
 
-list0 = urllib.request.urlopen('http://192.168.1.4').read().split()
+list0 = urllib.request.urlopen(correct_url).read().split()
 for i in range(1,2):
 	list0[i] = int(list0[i])/1024.0*3.3/0.30000
 
@@ -38,8 +56,8 @@ data1.append(list0[1])
 # data2.append(list0[2])
 # data3.append(list0[3])
 # data4.append(list0[4])
-
 x = 1
+
 
 while True:
 	
@@ -53,7 +71,9 @@ while True:
 		file.seek(0,2)
 	counter = counter + 1
 	teststr = time.strftime('%x\t%X')
-	list1 = urllib.request.urlopen('http://192.168.1.4').read().split()
+	
+	list1 = urllib.request.urlopen(correct_url).read().split()
+
 	for i in range(1,2):
 		list1[i] = int(list1[i])/1024.0*3.3/0.32934 #uA
 		teststr = teststr +"\t"+ str(list1[i])
