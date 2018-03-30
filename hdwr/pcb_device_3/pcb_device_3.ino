@@ -27,7 +27,8 @@ bool val = true;
 /*Sensor pin define*/
 String dataline="";
 unsigned long data_index = 0;
-
+// do not modify the device id, for WiFi connection purpose
+int device_id = 3;
 int num_average = 20;
 
 int s1;
@@ -165,7 +166,7 @@ void loop() {
 
             digitalWrite(mux_b, LOW);
             digitalWrite(mux_a, LOW);
-            dataline =String(data_index) +" "+ String(s1)+" "+String(s2)+" "+String(s3)+" "+String(s4);
+            dataline =String(device_id)+" "+ String(data_index) +" "+ String(s1)+" "+String(s2)+" "+String(s3)+" "+String(s4);
             Serial.print(dataline);
 
             client.print(dataline);
