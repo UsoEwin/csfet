@@ -10,20 +10,70 @@
  */
 #include <SPI.h>
 #include <WiFi101.h>
+#define fan_pin 6
+#define heater_pin 13
+#define tag 00
+
+#define num_average 20
+#define alpha 0.15
+#define LLlength 8
+#define ratio 100.00
 
 char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
-int fan_pin = 6;
 int i = 0;
 bool val = true;
 /*Sensor pin define*/
 String dataline="";
 unsigned long data_index = 0;
-int num_average = 20;
+
+double d1 = NAN;
+double pre_d1;
+double d2 = NAN;
+double pre_d2;
+double d3 = NAN;
+double pre_d3;
+
 int s1;
 int s2;
 int s3;
+
+double delta1[LLlength];
+double LL1[LLlength];
+double* p_delta_start1 = delta1;
+double* p_delta_end1 = delta1;
+double* p_LL_start1 = LL1;
+double* p_LL_end1 = LL1;
+double delta_sum1 = 0.0;
+double pre_delta1 = 0.0;
+double LL_sum1 = 0.0;
+double pre_LL1 = 0.0;
+
+double delta2[LLlength];
+double LL2[LLlength];
+double* p_delta_start2 = delta2;
+double* p_delta_end2 = delta2;
+double* p_LL_start2 = LL2;
+double* p_LL_end2 = LL2;
+double delta_sum2 = 0.0;
+double pre_delta2 = 0.0;
+double LL_sum2 = 0.0;
+double pre_LL2 = 0.0;
+
+double delta3[LLlength];
+double LL3[LLlength];
+double* p_delta_start3 = delta3;
+double* p_delta_end3 = delta3;
+double* p_LL_start3 = LL3;
+double* p_LL_end3 = LL3;
+double delta_sum3 = 0.0;
+double pre_delta3 = 0.0;
+double LL_sum3 = 0.0;
+double pre_LL3 = 0.0;
+
+unsigned long pre_time;
+unsigned long cur_time = 0;
 
 
 int status = WL_IDLE_STATUS;
@@ -89,15 +139,84 @@ void loop() {
             s1 = 0;
             s2 = 0;
             s3 = 0;
+            delay(50);
             for (i=0;i<num_average;i++) {
               s1 = s1+analogRead(A1);
               s2 = s2+analogRead(A2);
               s3 = s3+analogRead(A3);
             }
+            delay(50);
             s1 = s1/num_average;
             s2 = s2/num_average;
             s3 = s3/num_average;
-            dataline =String(data_index) +" "+ String(s1)+" "+String(s2)+" "+String(s3);
+
+            pre_d1 = d1;
+            pre_d2 = d2;
+            pre_d3 = d3;
+            
+            pre_time = cur_time;
+            d1 = (isnan(d1)) ? s1: s1*alpha+(1-alpha)*d1;
+            d2 = (isnan(d2)) ? s2: s2*alpha+(1-alpha)*d2;
+            d3 = (isnan(d3)) ? s3: s3*alpha+(1-alpha)*d3;
+            cur_time = millis();
+
+            dataline = String(tag)+ " "+String(data_index) +" "+ String(s1)+" "+ String(d1) +" "+ String(s2)+" "+ String(d2) +" "+ String(s3)+" "+ String(d3)+" ";
+            if (!isnan(pre_d1)) {
+              *p_LL_end1 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d1-pre_d1),2));
+              *p_LL_end2 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d2-pre_d2),2));
+              *p_LL_end3 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d3-pre_d3),2));
+              
+              Serial.print(String(sqrt(pow((cur_time - pre_time),2) + pow(ratio*(d1-pre_d1),2)))+" Here is it\n");
+              
+              LL_sum1 = LL_sum1 + *p_LL_end1 - pre_LL1;
+              LL_sum2 = LL_sum2 + *p_LL_end2 - pre_LL2;
+              LL_sum3 = LL_sum3 + *p_LL_end3 - pre_LL3;
+              
+              p_LL_end1 = LL1 + (((p_LL_end1-LL1)+1) % LLlength);
+              p_LL_end2 = LL2 + (((p_LL_end2-LL2)+1) % LLlength);
+              p_LL_end3 = LL3 + (((p_LL_end3-LL3)+1) % LLlength);
+              
+              *p_delta_end1 = ratio*(d1-pre_d1);
+              *p_delta_end2 = ratio*(d2-pre_d2);
+              *p_delta_end3 = ratio*(d3-pre_d3);
+              
+              delta_sum1 = delta_sum1 + *p_delta_end1 - pre_delta1;
+              delta_sum2 = delta_sum2 + *p_delta_end2 - pre_delta2;
+              delta_sum3 = delta_sum3 + *p_delta_end3 - pre_delta3;
+              
+              p_delta_end1 = delta1 + (((p_delta_end1-delta1)+1) % LLlength);
+              p_delta_end2 = delta2 + (((p_delta_end2-delta2)+1) % LLlength);
+              p_delta_end3 = delta3 + (((p_delta_end3-delta3)+1) % LLlength);
+              
+              //Serial.print("LL_pointer_end = " + String(p_LL_end-LL) + "\n");
+              //Serial.print("delta_pointer_end = " + String(p_delta_end-delta) + "\n");
+              if (p_LL_end1 == p_LL_start1) {
+                pre_LL1 = *p_LL_start1;
+                pre_LL2 = *p_LL_start2;
+                pre_LL3 = *p_LL_start3;
+                
+                p_LL_start1 = LL1 + (((p_LL_start1-LL1)+1) % LLlength);
+                p_LL_start2 = LL2 + (((p_LL_start2-LL2)+1) % LLlength);
+                p_LL_start3 = LL3 + (((p_LL_start3-LL3)+1) % LLlength);
+                
+                pre_delta1 = *p_delta_start1;
+                pre_delta2 = *p_delta_start2;
+                pre_delta3 = *p_delta_start3;
+                
+                p_delta_start1 = delta1 + (((p_delta_start1-delta1)+1) % LLlength);
+                p_delta_start2 = delta2 + (((p_delta_start2-delta2)+1) % LLlength);
+                p_delta_start3 = delta3 + (((p_delta_start3-delta3)+1) % LLlength);
+                //Serial.print("LL_pointer_end = " + String(p_LL_start-LL)+ "\n");
+                //Serial.print("delta_pointer_end = " + String(p_delta_start-delta)+ "\n");
+                
+                dataline += String(LL_sum1) + " " + String(delta_sum1) + " " + String(LL_sum2) + " " + String(delta_sum2)+ " " + String(LL_sum3) + " " + String(delta_sum3);
+              } else {
+                dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
+              }
+            } else {
+              dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
+            }
+            
             Serial.print(dataline);
 
             client.print(dataline);
