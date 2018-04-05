@@ -57,7 +57,6 @@ x = 0
 
 while True:
 	
-	#t_array.append(t)
 	#save the file every 5 cycles
 	if counter == 5:
 		counter = 1
@@ -73,7 +72,7 @@ while True:
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
 	teststr = "PROTOTYPE" + "\t" + str(list1[1]) + "\t" + time.strftime('%x\t%X') +"\t"+ str(list1[2]) +"\t"+ str(list1[3])+"\t"+ str(list1[8]) +"\t"+ str(list1[9]) +"\t"+ str(list1[4]) +"\t"+ str(list1[5]) +"\t"+ str(list1[10]) +"\t"+ str(list1[11]) +"\t"+ str(list1[6]) +"\t"+ str(list1[7]) +"\t"+ str(list1[12]) +"\t"+ str(list1[13])
 	t = time.time() - t0
-	
+
 	data1.append(list1[2])
 	data2.append(list1[4])
 	data3.append(list1[6])
@@ -83,6 +82,7 @@ while True:
 	filter3.append(list1[7])
 
 	t_array.append(t)
+	
 	if x>=length:
 		data1.popleft()
 		filter1.popleft()
