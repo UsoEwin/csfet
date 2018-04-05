@@ -7,7 +7,7 @@ import matplotlib.axes as axe
 import os
 from collections import deque
 
-length = 1000
+length = 400
 alpha = 1
 files_now=os.listdir("data/")
 file_num = len(files_now) + 1
@@ -35,7 +35,7 @@ file = open(namestring,"w")
 
 file.seek(0,2)
 counter = 1
-file.write("Dev_id\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor2_Filter\tSensor3_LL\tSensor3_Diff\n")
+file.write("Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\n")
 curr = 1
 last = 0
 
@@ -57,7 +57,6 @@ x = 0
 
 while True:
 	
-	t = time.time() - t0
 	#t_array.append(t)
 	#save the file every 5 cycles
 	if counter == 5:
@@ -66,14 +65,14 @@ while True:
 		file = open(namestring,"a")
 		file.seek(0,2)
 	counter = counter + 1
-	teststr = "PROTOTYPE" + '\t' + time.strftime('%x\t%X')
 
 	list1 = urllib.request.urlopen(correct_url).read().split()
 	for i in range(2,14):
 		list1[i] = float(list1[i])
 	for i in range(2,8):
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
-	teststr = teststr +"\t"+ str(list1[2]) +"\t"+ str(list1[3])+"\t"+ str(list1[8]) +"\t"+ str(list1[9]) +"\t"+ str(list1[4]) +"\t"+ str(list1[5]) +"\t"+ str(list1[10]) +"\t"+ str(list1[11]) +"\t"+ str(list1[6]) +"\t"+ str(list1[7]) +"\t"+ str(list1[12]) +"\t"+ str(list1[13])
+	teststr = "PROTOTYPE" + "\t" + str(list1[1]) + "\t" + time.strftime('%x\t%X') +"\t"+ str(list1[2]) +"\t"+ str(list1[3])+"\t"+ str(list1[8]) +"\t"+ str(list1[9]) +"\t"+ str(list1[4]) +"\t"+ str(list1[5]) +"\t"+ str(list1[10]) +"\t"+ str(list1[11]) +"\t"+ str(list1[6]) +"\t"+ str(list1[7]) +"\t"+ str(list1[12]) +"\t"+ str(list1[13])
+	t = time.time() - t0
 	
 	data1.append(list1[2])
 	data2.append(list1[4])
