@@ -27,7 +27,7 @@
 #define inc_threshold 105 //experimental value (variable)
 #define rec_threshold 500 //experimental value (variable)
 #define baseline_counter_threshold 1500 // 1500*4 seconds
-#define heater_counter_threshold 4 //
+#define heater_counter_threshold 5 //
 
 char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
@@ -50,7 +50,6 @@ int s2;
 int s3;
 
 char FSM_status = RECOVERY;
-char lock_flag = 1;
 int heater_counter = 0;
 int baseline_counter = 0;
 
@@ -236,51 +235,19 @@ void loop() {
             } else {
               dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
             }
-            Serial.print("FSM_status=");
-            switch(FSM_status) {
-              case RECOVERY:
-                Serial.println("RECOVERY\n");
-                if (heater_counter > heater_counter_threshold) {
-                  heater_counter = 0;
-                  digitalWrite(heater_pin, LOW);
-                  Serial.println("Heater is OFF");
-                  lock_flag = 1;
-                } else if (heater_counter > 0) {
-                  heater_counter++;
-                }
-                if (abs(LL_sum2) <= base_threshold && abs(delta_sum2) <= base_threshold && lock_flag) {
-                  FSM_status = BASELINE;
-                  baseline_counter = 0;
-                }
-                break;
-              case BASELINE:
-                Serial.println("BASELINE\n");
-                baseline_counter++;
-                if (LL_sum2_diff > inc_threshold) {
-                  FSM_status = INCREASE;
-                } else if (baseline_counter > baseline_counter_threshold) {
-                  FSM_status = RECOVERY;
-                  heater_counter = 1;
-                  lock_flag = 0;
-                  digitalWrite(heater_pin, HIGH);
-                  Serial.println("Heater is ON");
-                }
-                break;
-              case INCREASE:
-                Serial.println("INCREASE\n");
-                if (abs(LL_sum2-delta_sum2) > rec_threshold) {
-                  FSM_status = RECOVERY;
-                  Serial.println("STATUS = REC");
-                  heater_counter = 1;
-                  digitalWrite(heater_pin, HIGH);
-                  Serial.println("Heater is ON");
-                }
-                break;
+            Serial.print("Heater_status=");
+            if (data_index % 20 == 6) {
+              digitalWrite(heater_pin, HIGH);
+              FSM_status = 1;
             }
-            if (heater_counter) {
-              dataline += " 1";
+            if (data_index % 20 == 10) {
+              digitalWrite(heater_pin, LOW);
+              FSM_status = 0;
+            }
+            if (FSM_status) {
+              Serial.println("HEATER ON");
             } else {
-              dataline += " 0";
+              Serial.println("HEATER OFF");
             }
             
             Serial.println(dataline);

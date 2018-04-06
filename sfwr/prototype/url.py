@@ -20,6 +20,7 @@ print("check id now begin")
 correct_url = "http://192.168.1.1"
 for x in range(1,256):
 	correct_url = 'http://192.168.1.'+str(x)
+	print(correct_url+"\n")
 	try:
 		id_list = urllib.request.urlopen(correct_url).read().split()
 		if int(id_list[0]) == device_id:
@@ -35,7 +36,7 @@ file = open(namestring,"w")
 
 file.seek(0,2)
 counter = 1
-file.write("Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\n")
+file.write("Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\tHeater_Status\n")
 curr = 1
 last = 0
 
@@ -68,9 +69,11 @@ while True:
 	list1 = urllib.request.urlopen(correct_url).read().split()
 	for i in range(2,14):
 		list1[i] = float(list1[i])
+	
+	list1[14] = int(list1[14])
 	for i in range(2,8):
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
-	teststr = "PROTOTYPE" + "\t" + str(list1[1]) + "\t" + time.strftime('%x\t%X') +"\t"+ str(list1[2]) +"\t"+ str(list1[3])+"\t"+ str(list1[8]) +"\t"+ str(list1[9]) +"\t"+ str(list1[4]) +"\t"+ str(list1[5]) +"\t"+ str(list1[10]) +"\t"+ str(list1[11]) +"\t"+ str(list1[6]) +"\t"+ str(list1[7]) +"\t"+ str(list1[12]) +"\t"+ str(list1[13])
+	teststr = "PROTOTYPE" + "\t" + str(list1[1]) + "\t" + time.strftime('%x\t%X') +"\t"+ str(list1[2]) +"\t"+ str(list1[3])+"\t"+ str(list1[8]) +"\t"+ str(list1[9]) +"\t"+ str(list1[4]) +"\t"+ str(list1[5]) +"\t"+ str(list1[10]) +"\t"+ str(list1[11]) +"\t"+ str(list1[6]) +"\t"+ str(list1[7]) +"\t"+ str(list1[12]) +"\t"+ str(list1[13])+"\t" + str(list1[14])
 	t = time.time() - t0
 
 	data1.append(list1[2])
@@ -87,13 +90,12 @@ while True:
 		data1.popleft()
 		filter1.popleft()
 		data2.popleft()
-		filter3.popleft()
+		filter2.popleft()
 		data3.popleft()
 		filter3.popleft()
 		# data4.popleft()
 		# filter4.popleft()
 		t_array.popleft()
-
 	plt.figure(1)
 	
 	plt.subplot(311)
@@ -104,7 +106,7 @@ while True:
 	plt.xlabel('Time(s)')
 	gap = 0.6*(max(data1)-min(data1))
 	if x>length:
-		plt.xlim( t_array[-length],t_array[-1])
+		plt.xlim(t_array[-length],t_array[-1])
 		plt.ylim(min(data1)-gap,max(data1)+gap)
 	
 	plt.subplot(312)
@@ -115,7 +117,7 @@ while True:
 	plt.xlabel('Time(s)')
 	gap = 0.6*(max(data2)-min(data2))
 	if x>length:
-		plt.xlim( t_array[-length],t_array[-1])
+		plt.xlim(t_array[-length],t_array[-1])
 		plt.ylim(min(data2)-gap,max(data2)+gap)
 	
 	plt.subplot(313)
@@ -126,7 +128,7 @@ while True:
 	plt.xlabel('Time(s)')
 	gap = 0.6*(max(data3)-min(data3))
 	if x>length:
-		plt.xlim( t_array[-length],t_array[-1])
+		plt.xlim(t_array[-length],t_array[-1])
 		plt.ylim(min(data3)-gap,max(data3)+gap)
 	
 	# plt.subplot(224)
