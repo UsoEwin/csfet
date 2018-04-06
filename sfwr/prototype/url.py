@@ -17,7 +17,7 @@ file_num_list = [file_num]
 #device id, hardcoded do not modify
 device_id = 00
 write_file_cycle = 10
-write_files_multiplier = 2
+write_files_multiplier = 20
 first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\tHeater_Status\n"
 
 #check device id
@@ -165,7 +165,6 @@ while True:
 		if x % (write_files_multiplier * write_file_cycle) == 0:
 			file_num += 1
 			file_num_list.append(file_num)
-			print(file_num_list)
 			file_name = folder_name+str(file_num).zfill(6)
 			file = open(file_name,"w")
 			file.seek(0,2)
@@ -178,7 +177,7 @@ while True:
 
 #merge file here
 file_name = folder_name+str(file_num_list[0]).zfill(6)
-for i in range(2, len(file_num_list)):
+for i in range(1, len(file_num_list)):
 	file = open(file_name, "a")
 	with open(folder_name+str(file_num_list[i]).zfill(6)) as subfile:
 		subdata = subfile.read()
@@ -186,7 +185,7 @@ for i in range(2, len(file_num_list)):
 	file.write(subdata)
 	file.close()
 	os.remove(folder_name+str(file_num_list[i]).zfill(6))
-print("Exit From Here")
+print("Exit Normally")
 
 
 

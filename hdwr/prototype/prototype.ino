@@ -23,8 +23,8 @@
 #define BASELINE 1
 #define INCREASE 2
 
-#define base_threshold 90 //experimental value (variable)
-#define inc_threshold 105 //experimental value (variable)
+#define base_threshold 100 //experimental value (variable)
+#define inc_threshold 115 //experimental value (variable)
 #define rec_threshold 500 //experimental value (variable)
 #define baseline_counter_threshold 1500 // 1500*4 seconds
 #define heater_counter_threshold 4 //
