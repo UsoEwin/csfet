@@ -9,7 +9,8 @@ from collections import deque
 
 length = 400
 alpha = 1
-files_now=os.listdir("data/")
+folder_name = "data/"
+files_now=os.listdir(folder_name)
 files_now.sort()
 file_num = int(files_now[-1])+1 if files_now else 1
 file_num_list = [file_num]
@@ -34,8 +35,8 @@ for ip in range(1,256):
 	except:
 		continue
 
-namestring = "data/"+str(file_num).zfill(6)
-file = open(namestring,"w")
+file_name = folder_name+str(file_num).zfill(6)
+file = open(file_name,"w")
 file.seek(0,2)
 file.write(first_line)
 
@@ -165,19 +166,27 @@ while True:
 			file_num += 1
 			file_num_list.append(file_num)
 			print(file_num_list)
-			namestring = "data/"+str(file_num).zfill(6)
-			file = open(namestring,"w")
+			file_name = folder_name+str(file_num).zfill(6)
+			file = open(file_name,"w")
 			file.seek(0,2)
 			file.write(first_line)
 		else:
-			file = open(namestring,"a")
+			file = open(file_name,"a")
 		file.seek(0,2)
 
 	time.sleep(1)
 
 #merge file here
+file_name = folder_name+str(file_num_list[0]).zfill(6)
+for i in range(2, len(file_num_list)):
+	file = open(file_name, "a")
+	with open(folder_name+str(file_num_list[i]).zfill(6)) as subfile:
+		subdata = subfile.read()
+	subdata = subdata[len(first_line):]
+	file.write(subdata)
+	file.close()
+	os.remove(folder_name+str(file_num_list[i]).zfill(6))
 print("Exit From Here")
-file.close()
 
 
 
