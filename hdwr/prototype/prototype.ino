@@ -19,6 +19,16 @@
 #define LLlength 8
 #define ratio 100.00
 
+#define RECOVERY 0
+#define BASELINE 1
+#define INCREASE 2
+
+#define base_threshold 90 //experimental value (variable)
+#define inc_threshold 105 //experimental value (variable)
+#define rec_threshold 500 //experimental value (variable)
+#define baseline_counter_threshold 1500 // 1500*4 seconds
+#define heater_counter_threshold 2 //
+
 char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
@@ -39,6 +49,10 @@ int s1;
 int s2;
 int s3;
 
+char FSM_status = RECOVERY;
+int heater_counter = 0;
+int baseline_counter = 0;
+
 double delta1[LLlength];
 double LL1[LLlength];
 double* p_delta_start1 = delta1;
@@ -49,6 +63,7 @@ double delta_sum1 = 0.0;
 double pre_delta1 = 0.0;
 double LL_sum1 = 0.0;
 double pre_LL1 = 0.0;
+double LL_sum1_diff = 0.0;
 
 double delta2[LLlength];
 double LL2[LLlength];
@@ -60,6 +75,7 @@ double delta_sum2 = 0.0;
 double pre_delta2 = 0.0;
 double LL_sum2 = 0.0;
 double pre_LL2 = 0.0;
+double LL_sum2_diff = 0.0;
 
 double delta3[LLlength];
 double LL3[LLlength];
@@ -71,10 +87,10 @@ double delta_sum3 = 0.0;
 double pre_delta3 = 0.0;
 double LL_sum3 = 0.0;
 double pre_LL3 = 0.0;
+double LL_sum3_diff = 0.0;
 
 unsigned long pre_time;
 unsigned long cur_time = 0;
-
 
 int status = WL_IDLE_STATUS;
 WiFiServer server(80);
@@ -82,6 +98,7 @@ void setup() {
   Serial.begin(9600);      // initialize serial communication
   Serial.print("Start Serial ");
   pinMode(fan_pin, OUTPUT);      // set the LED pin mode
+  pinMode(heater_pin, OUTPUT);
   // Check for the presence of the shield
   Serial.print("WiFi101 shield: ");
 
@@ -106,7 +123,7 @@ void setup() {
   }
   server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status
-  digitalWrite(fan_pin, HIGH);
+  digitalWrite(heater_pin, LOW);
 }
 void loop() {
   WiFiClient client = server.available();   // listen for incoming clients
@@ -166,11 +183,13 @@ void loop() {
               *p_LL_end2 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d2-pre_d2),2));
               *p_LL_end3 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d3-pre_d3),2));
               
-              Serial.print(String(sqrt(pow((cur_time - pre_time),2) + pow(ratio*(d1-pre_d1),2)))+" Here is it\n");
-              
-              LL_sum1 = LL_sum1 + *p_LL_end1 - pre_LL1;
-              LL_sum2 = LL_sum2 + *p_LL_end2 - pre_LL2;
-              LL_sum3 = LL_sum3 + *p_LL_end3 - pre_LL3;
+              //Serial.print(String(sqrt(pow((cur_time - pre_time),2) + pow(ratio*(d1-pre_d1),2)))+" Here is it\n");
+              LL_sum1_diff = *p_LL_end1 - pre_LL1;
+              LL_sum1 = LL_sum1 + LL_sum1_diff;
+              LL_sum2_diff = *p_LL_end2 - pre_LL2;
+              LL_sum2 = LL_sum2 + LL_sum2_diff;
+              LL_sum3_diff = *p_LL_end3 - pre_LL3;
+              LL_sum3 = LL_sum3 + LL_sum3_diff;
               
               p_LL_end1 = LL1 + (((p_LL_end1-LL1)+1) % LLlength);
               p_LL_end2 = LL2 + (((p_LL_end2-LL2)+1) % LLlength);
@@ -216,6 +235,45 @@ void loop() {
             } else {
               dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
             }
+            switch(FSM_status) {
+              case RECOVERY:
+                if (heater_counter > heater_counter_threshold) {
+                  heater_counter = 0;
+                  digitalWrite(heater_pin, LOW);
+                  Serial.println("Heater is OFF");
+                } else if (heater_counter > 0) {
+                  heater_counter++;
+                }
+                if (abs(LL_sum2) <= base_threshold && abs(delta_sum2) <= base_threshold) {
+                  FSM_status = BASELINE;
+                  Serial.println("STATUS = BAS");
+                  baseline_counter = 0;
+                }
+                break;
+              case BASELINE:
+                baseline_counter++;
+                if (LL_sum2_diff > inc_threshold) {
+                  FSM_status = INCREASE;
+                  Serial.println("STATUS = INC");
+                } else if (baseline_counter > baseline_counter_threshold) {
+                  FSM_status = RECOVERY;
+                  Serial.println("STATUS = REC");
+                  heater_counter = 1;
+                  digitalWrite(heater_pin, HIGH);
+                  Serial.println("Heater is ON");
+                }
+                break;
+              case INCREASE:
+                if (abs(LL_sum2-delta_sum2) > rec_threshold) {
+                  FSM_status = RECOVERY;
+                  Serial.println("STATUS = REC");
+                  heater_counter = 1;
+                  digitalWrite(heater_pin, HIGH);
+                  Serial.println("Heater is ON");
+                }
+                break;
+            }
+
             
             Serial.print(dataline);
 
