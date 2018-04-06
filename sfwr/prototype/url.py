@@ -92,56 +92,62 @@ while True:
 		# data4.popleft()
 		# filter4.popleft()
 		t_array.popleft()
-	plt.figure(1)
 	
-	plt.subplot(311)
-	plt.plot(t_array,data1,"b.--")
-	plt.plot(t_array,filter1,"r.--")
-	plt.title('Channel 1 Signal')
-	plt.ylabel('Current(uA)')
-	plt.xlabel('Time(s)')
-	gap = 0.6*(max(data1)-min(data1))
-	if x>length:
-		plt.xlim(t_array[-length],t_array[-1])
-		plt.ylim(min(data1)-gap,max(data1)+gap)
-	
-	plt.subplot(312)
-	plt.plot(t_array,data2,"b.--")
-	plt.plot(t_array,filter2,"r.--")
-	plt.title('Channel 2 Signal')
-	plt.ylabel('Current(uA)')
-	plt.xlabel('Time(s)')
-	gap = 0.6*(max(data2)-min(data2))
-	if x>length:
-		plt.xlim(t_array[-length],t_array[-1])
-		plt.ylim(min(data2)-gap,max(data2)+gap)
-	
-	plt.subplot(313)
-	plt.plot(t_array,data3,"b.--")
-	plt.plot(t_array,filter3,"r.--")
-	plt.title('Channel 3 Signal')
-	plt.ylabel('Current(uA)')
-	plt.xlabel('Time(s)')
-	gap = 0.6*(max(data3)-min(data3))
-	if x>length:
-		plt.xlim(t_array[-length],t_array[-1])
-		plt.ylim(min(data3)-gap,max(data3)+gap)
-	
-	# plt.subplot(224)
-	# plt.plot(t_array,data4,"c.--")
-	# plt.title('Channel 4 Signal')
-	# plt.ylabel('Current(uA)')
-	# plt.xlabel('Time(s)')
-	# gap = 0.6*(max(data4)-min(data4))
-	# if x>length:
-	# 	plt.xlim( t_array[-length],t_array[-1])
-	# 	plt.ylim(min(data4)-gap,max(data4)+gap)
-	# # plt.plot(t_array,data3,"b.--")
-	# # plt.title('Channel 3 Signal')
-	# # plt.ylabel('Current(uA)')
-	# # plt.xlabel('Time(s)')
-	plt.tight_layout()
-	plt.pause(0.05)
+	#plot results
+	try:
+		plt.figure(1)
+		plt.subplot(311)
+		plt.plot(t_array,data1,"b.--")
+		plt.plot(t_array,filter1,"r.--")
+		plt.title('Channel 1 Signal')
+		plt.ylabel('Current(uA)')
+		plt.xlabel('Time(s)')
+		gap = 0.6*(max(data1)-min(data1))
+		if x>length:
+			plt.xlim(t_array[-length],t_array[-1])
+			plt.ylim(min(data1)-gap,max(data1)+gap)
+		
+		plt.subplot(312)
+		plt.plot(t_array,data2,"b.--")
+		plt.plot(t_array,filter2,"r.--")
+		plt.title('Channel 2 Signal')
+		plt.ylabel('Current(uA)')
+		plt.xlabel('Time(s)')
+		gap = 0.6*(max(data2)-min(data2))
+		if x>length:
+			plt.xlim(t_array[-length],t_array[-1])
+			plt.ylim(min(data2)-gap,max(data2)+gap)
+		
+		plt.subplot(313)
+		plt.plot(t_array,data3,"b.--")
+		plt.plot(t_array,filter3,"r.--")
+		plt.title('Channel 3 Signal')
+		plt.ylabel('Current(uA)')
+		plt.xlabel('Time(s)')
+		gap = 0.6*(max(data3)-min(data3))
+		if x>length:
+			plt.xlim(t_array[-length],t_array[-1])
+			plt.ylim(min(data3)-gap,max(data3)+gap)
+		
+		# plt.subplot(224)
+		# plt.plot(t_array,data4,"c.--")
+		# plt.title('Channel 4 Signal')
+		# plt.ylabel('Current(uA)')
+		# plt.xlabel('Time(s)')
+		# gap = 0.6*(max(data4)-min(data4))
+		# if x>length:
+		# 	plt.xlim( t_array[-length],t_array[-1])
+		# 	plt.ylim(min(data4)-gap,max(data4)+gap)
+		# # plt.plot(t_array,data3,"b.--")
+		# # plt.title('Channel 3 Signal')
+		# # plt.ylabel('Current(uA)')
+		# # plt.xlabel('Time(s)')
+		plt.tight_layout()
+		plt.pause(0.05)
+
+	except Exception as e:
+		file.close()
+		break
 
 	teststr = teststr + "\n"
 	
@@ -154,7 +160,7 @@ while True:
 	x +=1
 	
 	if x % write_file_cycle == 0:
-		file.close();
+		file.close()
 		if x % (write_files_multiplier * write_file_cycle) == 0:
 			file_num += 1
 			file_num_list.append(file_num)
@@ -169,6 +175,7 @@ while True:
 
 	time.sleep(1)
 
+#merge file here
 print("Exit From Here")
 file.close()
 
