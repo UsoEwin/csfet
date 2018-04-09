@@ -23,8 +23,8 @@
 #define BASELINE 1
 #define INCREASE 2
 
-#define baseline_counter_threshold 1000 // 1000*4 seconds
-#define heater_counter_threshold 20 //
+#define baseline_counter_threshold 600 // 1000*4 seconds
+#define heater_counter_threshold 15 //
 
 int base_threshold_1 = 100; //experimental value (variable)
 int inc_threshold_1 = 90; //experimental value (variable)
@@ -132,6 +132,7 @@ void setup() {
   Serial.print("Start Serial ");
   pinMode(fan_pin, OUTPUT);      // set the LED pin mode
   pinMode(heater_pin, OUTPUT);
+  digitalWrite(heater_pin, LOW);
   // Check for the presence of the shield
   Serial.print("WiFi101 shield: ");
 
@@ -156,7 +157,6 @@ void setup() {
   }
   server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status
-  digitalWrite(heater_pin, LOW);
 }
 void loop() {
   WiFiClient client = server.available();   // listen for incoming clients
