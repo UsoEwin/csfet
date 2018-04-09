@@ -14,7 +14,7 @@
 #define heater_pin 6
 #define tag 00
 
-#define num_average 20
+#define num_average 30
 #define alpha 0.15
 #define LLlength 8
 #define ratio 100.00
@@ -23,11 +23,28 @@
 #define BASELINE 1
 #define INCREASE 2
 
-#define base_threshold 100 //experimental value (variable)
-#define inc_threshold 115 //experimental value (variable)
-#define rec_threshold 500 //experimental value (variable)
 #define baseline_counter_threshold 1000 // 1000*4 seconds
-#define heater_counter_threshold 7 //
+#define heater_counter_threshold 20 //
+
+int base_threshold_1 = 100; //experimental value (variable)
+int inc_threshold_1 = 90; //experimental value (variable)
+int rec_threshold_1 = 500; //experimental value (variable)
+bool if_channel_1_inc = false;
+
+int base_threshold_2 = 100; //experimental value (variable)
+int inc_threshold_2 = 90; //experimental value (variable)
+int rec_threshold_2 = 500; //experimental value (variable)
+bool if_channel_2_inc = false;
+
+int base_threshold_3 = 100; //experimental value (variable)
+int inc_threshold_3 = 90; //experimental value (variable)
+int rec_threshold_3 = 500; //experimental value (variable)
+bool if_channel_3_inc = false;
+
+int base_threshold_4 = 100; //experimental value (variable)
+int inc_threshold_4 = 90; //experimental value (variable)
+int rec_threshold_4 = 500; //experimental value (variable)
+bool if_channel_4_inc = false;
 
 char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
@@ -44,10 +61,13 @@ double d2 = NAN;
 double pre_d2;
 double d3 = NAN;
 double pre_d3;
+double d4 = NAN;
+double pre_d4;
 
 int s1;
 int s2;
 int s3;
+int s4;
 
 char FSM_status = RECOVERY;
 char lock_flag = 1;
@@ -64,7 +84,7 @@ double delta_sum1 = 0.0;
 double pre_delta1 = 0.0;
 double LL_sum1 = 0.0;
 double pre_LL1 = 0.0;
-double LL_sum1_diff = 0.0;
+double delta_sum1_diff = 0.0;
 
 double delta2[LLlength];
 double LL2[LLlength];
@@ -76,7 +96,7 @@ double delta_sum2 = 0.0;
 double pre_delta2 = 0.0;
 double LL_sum2 = 0.0;
 double pre_LL2 = 0.0;
-double LL_sum2_diff = 0.0;
+double delta_sum2_diff = 0.0;
 
 double delta3[LLlength];
 double LL3[LLlength];
@@ -88,7 +108,19 @@ double delta_sum3 = 0.0;
 double pre_delta3 = 0.0;
 double LL_sum3 = 0.0;
 double pre_LL3 = 0.0;
-double LL_sum3_diff = 0.0;
+double delta_sum3_diff = 0.0;
+
+double delta4[LLlength];
+double LL4[LLlength];
+double* p_delta_start4 = delta4;
+double* p_delta_end4 = delta4;
+double* p_LL_start4 = LL4;
+double* p_LL_end4 = LL4;
+double delta_sum4 = 0.0;
+double pre_delta4 = 0.0;
+double LL_sum4 = 0.0;
+double pre_LL4 = 0.0;
+double delta_sum4_diff = 0.0;
 
 unsigned long pre_time;
 unsigned long cur_time = 0;
@@ -119,8 +151,8 @@ void setup() {
     //digitalWrite(fan_pin, HIGH);
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
-    // wait 10 seconds for connection:
-    delay(10000);
+    // wait 3 seconds for connection:
+    delay(3000);
   }
   server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status
@@ -139,7 +171,6 @@ void loop() {
         Serial.write(c);                    // print it out the serial monitor
         
         if (c == '\n') {                    // if the byte is a newline character
-            
           // if the current line is blank, you got two newline characters in a row.
           // that's the end of the client HTTP request, so send a response:
           if (currentLine.length() == 0) {
@@ -157,56 +188,67 @@ void loop() {
             s1 = 0;
             s2 = 0;
             s3 = 0;
-            delay(50);
+            s4 = 0;
+            delay(20);
             for (i=0;i<num_average;i++) {
               s1 = s1+analogRead(A1);
               s2 = s2+analogRead(A2);
               s3 = s3+analogRead(A3);
+              s4 = s4+analogRead(A4);
             }
-            delay(50);
+            delay(20);
             s1 = s1/num_average;
             s2 = s2/num_average;
             s3 = s3/num_average;
-
+            s4 = s4/num_average;
             pre_d1 = d1;
             pre_d2 = d2;
             pre_d3 = d3;
+            pre_d4 = d4;
             
             pre_time = cur_time;
             d1 = (isnan(d1)) ? s1: s1*alpha+(1-alpha)*d1;
             d2 = (isnan(d2)) ? s2: s2*alpha+(1-alpha)*d2;
             d3 = (isnan(d3)) ? s3: s3*alpha+(1-alpha)*d3;
+            d4 = (isnan(d4)) ? s4: s4*alpha+(1-alpha)*d4;
             cur_time = millis();
 
-            dataline = String(tag)+ " "+String(data_index) +" "+ String(s1)+" "+ String(d1) +" "+ String(s2)+" "+ String(d2) +" "+ String(s3)+" "+ String(d3)+" ";
+            dataline = String(tag)+ " "+String(data_index) +" "+ String(s1)+" "+ String(d1) +" "+ String(s2)+" "+ String(d2) +" "+ String(s3)+" "+ String(d3)+" "+ String(s4)+" "+ String(d4)+" ";
             if (!isnan(pre_d1)) {
               *p_LL_end1 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d1-pre_d1),2));
               *p_LL_end2 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d2-pre_d2),2));
               *p_LL_end3 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d3-pre_d3),2));
+              *p_LL_end4 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d4-pre_d4),2));
               
               //Serial.print(String(sqrt(pow((cur_time - pre_time),2) + pow(ratio*(d1-pre_d1),2)))+" Here is it\n");
-              LL_sum1_diff = *p_LL_end1 - pre_LL1;
-              LL_sum1 = LL_sum1 + LL_sum1_diff;
-              LL_sum2_diff = *p_LL_end2 - pre_LL2;
-              LL_sum2 = LL_sum2 + LL_sum2_diff;
-              LL_sum3_diff = *p_LL_end3 - pre_LL3;
-              LL_sum3 = LL_sum3 + LL_sum3_diff;
+              LL_sum1 = LL_sum1 + *p_LL_end1 - pre_LL1;
+              LL_sum2 = LL_sum2 + *p_LL_end2 - pre_LL2;
+              LL_sum3 = LL_sum3 + *p_LL_end3 - pre_LL3;
+              LL_sum4 = LL_sum4 + *p_LL_end4 - pre_LL4;
               
               p_LL_end1 = LL1 + (((p_LL_end1-LL1)+1) % LLlength);
               p_LL_end2 = LL2 + (((p_LL_end2-LL2)+1) % LLlength);
               p_LL_end3 = LL3 + (((p_LL_end3-LL3)+1) % LLlength);
+              p_LL_end4 = LL4 + (((p_LL_end4-LL4)+1) % LLlength);
               
               *p_delta_end1 = ratio*(d1-pre_d1);
               *p_delta_end2 = ratio*(d2-pre_d2);
               *p_delta_end3 = ratio*(d3-pre_d3);
+              *p_delta_end4 = ratio*(d4-pre_d4);
               
-              delta_sum1 = delta_sum1 + *p_delta_end1 - pre_delta1;
-              delta_sum2 = delta_sum2 + *p_delta_end2 - pre_delta2;
-              delta_sum3 = delta_sum3 + *p_delta_end3 - pre_delta3;
-              
+              delta_sum1_diff = *p_delta_end1 - pre_delta1;
+              delta_sum1 = delta_sum1 + delta_sum1_diff;
+              delta_sum2_diff = *p_delta_end2 - pre_delta2;
+              delta_sum2 = delta_sum2 + delta_sum2_diff;
+              delta_sum3_diff = *p_delta_end3 - pre_delta3;
+              delta_sum3 = delta_sum3 + delta_sum3_diff;
+              delta_sum4_diff = *p_delta_end4 - pre_delta4;
+              delta_sum4 = delta_sum4 + delta_sum4_diff;
+
               p_delta_end1 = delta1 + (((p_delta_end1-delta1)+1) % LLlength);
               p_delta_end2 = delta2 + (((p_delta_end2-delta2)+1) % LLlength);
               p_delta_end3 = delta3 + (((p_delta_end3-delta3)+1) % LLlength);
+              p_delta_end4 = delta4 + (((p_delta_end4-delta4)+1) % LLlength);
               
               //Serial.print("LL_pointer_end = " + String(p_LL_end-LL) + "\n");
               //Serial.print("delta_pointer_end = " + String(p_delta_end-delta) + "\n");
@@ -214,28 +256,33 @@ void loop() {
                 pre_LL1 = *p_LL_start1;
                 pre_LL2 = *p_LL_start2;
                 pre_LL3 = *p_LL_start3;
+                pre_LL4 = *p_LL_start4;
                 
                 p_LL_start1 = LL1 + (((p_LL_start1-LL1)+1) % LLlength);
                 p_LL_start2 = LL2 + (((p_LL_start2-LL2)+1) % LLlength);
                 p_LL_start3 = LL3 + (((p_LL_start3-LL3)+1) % LLlength);
+                p_LL_start4 = LL4 + (((p_LL_start4-LL4)+1) % LLlength);
                 
                 pre_delta1 = *p_delta_start1;
                 pre_delta2 = *p_delta_start2;
                 pre_delta3 = *p_delta_start3;
+                pre_delta4 = *p_delta_start4;
                 
                 p_delta_start1 = delta1 + (((p_delta_start1-delta1)+1) % LLlength);
                 p_delta_start2 = delta2 + (((p_delta_start2-delta2)+1) % LLlength);
                 p_delta_start3 = delta3 + (((p_delta_start3-delta3)+1) % LLlength);
+                p_delta_start4 = delta4 + (((p_delta_start4-delta4)+1) % LLlength);
                 //Serial.print("LL_pointer_end = " + String(p_LL_start-LL)+ "\n");
                 //Serial.print("delta_pointer_end = " + String(p_delta_start-delta)+ "\n");
                 
-                dataline += String(LL_sum1) + " " + String(delta_sum1) + " " + String(LL_sum2) + " " + String(delta_sum2)+ " " + String(LL_sum3) + " " + String(delta_sum3);
+                dataline += String(LL_sum1) + " " + String(delta_sum1) + " " + String(LL_sum2) + " " + String(delta_sum2)+ " " + String(LL_sum3) + " " + String(delta_sum3) + " " + String(LL_sum4) + " " + String(delta_sum4);
               } else {
-                dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
+                dataline += "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
               }
             } else {
-              dataline += "0.0 0.0 0.0 0.0 0.0 0.0";
+              dataline += "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0";
             }
+            
             Serial.print("FSM_status=");
             switch(FSM_status) {
               case RECOVERY:
@@ -248,7 +295,10 @@ void loop() {
                 } else if (heater_counter > 0) {
                   heater_counter++;
                 }
-                if (abs(LL_sum2) <= base_threshold && abs(delta_sum2) <= base_threshold && lock_flag) {
+                if (abs(delta_sum1) <= base_threshold_1 &&
+                    abs(delta_sum2) <= base_threshold_2 &&
+                    abs(delta_sum3) <= base_threshold_3 &&
+                    abs(delta_sum4) <= base_threshold_4 && lock_flag) {
                   FSM_status = BASELINE;
                   baseline_counter = 0;
                 }
@@ -256,7 +306,11 @@ void loop() {
               case BASELINE:
                 Serial.println("BASELINE\n");
                 baseline_counter++;
-                if (LL_sum2_diff > inc_threshold) {
+                if_channel_1_inc = (abs(delta_sum1_diff) > inc_threshold_1);
+                if_channel_2_inc = (abs(delta_sum2_diff) > inc_threshold_2);
+                if_channel_3_inc = (abs(delta_sum3_diff) > inc_threshold_3);
+                if_channel_4_inc = (abs(delta_sum4_diff) > inc_threshold_4);
+                if (if_channel_1_inc || if_channel_2_inc || if_channel_3_inc || if_channel_4_inc) {
                   FSM_status = INCREASE;
                 } else if (baseline_counter > baseline_counter_threshold) {
                   FSM_status = RECOVERY;
@@ -268,9 +322,11 @@ void loop() {
                 break;
               case INCREASE:
                 Serial.println("INCREASE\n");
-                if (abs(LL_sum2-delta_sum2) > rec_threshold) {
+                if (((abs(LL_sum1-delta_sum1) > rec_threshold_1) && if_channel_1_inc) ||
+                    ((abs(LL_sum2-delta_sum2) > rec_threshold_2) && if_channel_2_inc) ||
+                    ((abs(LL_sum3-delta_sum3) > rec_threshold_3) && if_channel_3_inc) ||
+                    ((abs(LL_sum4-delta_sum4) > rec_threshold_4) && if_channel_4_inc)) {
                   FSM_status = RECOVERY;
-                  Serial.println("STATUS = REC");
                   heater_counter = 1;
                   digitalWrite(heater_pin, HIGH);
                   Serial.println("Heater is ON");
@@ -282,6 +338,7 @@ void loop() {
             } else {
               dataline += " 0";
             }
+            dataline += " " + String(FSM_status);
             
             Serial.println(dataline);
 
@@ -310,13 +367,22 @@ void loop() {
         }
         */
       }
-    }    
-    
-    
+    } //END OF WHILE loop   
     client.stop();
-  
+    //if client is disconnected, turn to initial state
+    FSM_status = RECOVERY;
+    heater_counter = 0;
+    baseline_counter = 0;
+    digitalWrite(heater_pin, LOW);
+    lock_flag = 1;
     Serial.println("client disonnected");
-    //digitalWrite(fan_pin,LOW);
+  } else {
+    //if client is disconnected, turn to initial state
+    FSM_status = RECOVERY;
+    heater_counter = 0;
+    baseline_counter = 0;
+    digitalWrite(heater_pin, LOW);
+    lock_flag = 1;
   }
 }
  
