@@ -7,8 +7,7 @@ import matplotlib.axes as axe
 import os
 from collections import deque
 
-length = 400
-alpha = 1
+length = 200
 folder_name = "data/"
 files_now=os.listdir(folder_name)
 files_now.sort()
@@ -60,8 +59,6 @@ t0 = time.time()
 x = 0
 
 while True:
-	
-	#save the file every 5 cycles
 	list1 = urllib.request.urlopen(correct_url).read().split()
 	for i in range(2,14):
 		list1[i] = float(list1[i])
@@ -160,6 +157,7 @@ while True:
 	curr = int(list1[1])
 	x +=1
 	
+	#save the file every n cycles
 	if x % write_file_cycle == 0:
 		file.close()
 		if x % (write_files_multiplier * write_file_cycle) == 0:

@@ -26,8 +26,8 @@
 #define base_threshold 100 //experimental value (variable)
 #define inc_threshold 115 //experimental value (variable)
 #define rec_threshold 500 //experimental value (variable)
-#define baseline_counter_threshold 1500 // 1500*4 seconds
-#define heater_counter_threshold 4 //
+#define baseline_counter_threshold 1000 // 1000*4 seconds
+#define heater_counter_threshold 7 //
 
 char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
