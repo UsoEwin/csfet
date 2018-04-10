@@ -1,11 +1,14 @@
 import urllib.request
 import time
 import numpy as np
+import os
+from collections import deque
+import matplotlib
 import matplotlib.pyplot as plt
 import tkinter
 import matplotlib.axes as axe
-import os
-from collections import deque
+
+matplotlib.use('GTKAgg')
 
 length = 200
 folder_name = "data/"
