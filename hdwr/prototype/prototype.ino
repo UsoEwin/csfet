@@ -13,6 +13,7 @@
 #define fan_pin 13
 #define heater_pin 6
 #define tag 00
+#define delaytime 5000 //milliseconds
 
 #define num_average 30
 #define alpha 0.15
@@ -125,6 +126,8 @@ double delta_sum4_diff = 0.0;
 unsigned long pre_time;
 unsigned long cur_time = 0;
 
+unsigned long offline_counter = 0;
+
 int status = WL_IDLE_STATUS;
 WiFiServer server(80);
 void setup() {
@@ -153,7 +156,7 @@ void setup() {
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
     status = WiFi.begin(ssid, pass);
     // wait 3 seconds for connection:
-    delay(3000);
+    delay(delaytime);
   }
   server.begin();                           // start the web server on port 80
   printWifiStatus();                        // you're connected now, so print out the status
@@ -162,6 +165,7 @@ void loop() {
   WiFiClient client = server.available();   // listen for incoming clients
   
   if (client) {                             // if you get a client,
+    offline_counter = 0;
     Serial.println("new client");           // print a message out the serial port
     String currentLine = "";                // make a String to hold incoming data from the client
     //digitalWrite(fan_pin,HIGH);  			// give the fan high signal once client is connected
@@ -297,8 +301,7 @@ void loop() {
                 }
                 if (abs(delta_sum1) <= base_threshold_1 &&
                     abs(delta_sum2) <= base_threshold_2 &&
-                    abs(delta_sum3) <= base_threshold_3 &&
-                    abs(delta_sum4) <= base_threshold_4 && lock_flag) {
+                    abs(delta_sum3) <= base_threshold_3 && lock_flag) {
                   FSM_status = BASELINE;
                   baseline_counter = 0;
                 }
@@ -310,7 +313,7 @@ void loop() {
                 if_channel_2_inc = (abs(delta_sum2_diff) > inc_threshold_2);
                 if_channel_3_inc = (abs(delta_sum3_diff) > inc_threshold_3);
                 if_channel_4_inc = (abs(delta_sum4_diff) > inc_threshold_4);
-                if (if_channel_1_inc || if_channel_2_inc || if_channel_3_inc || if_channel_4_inc) {
+                if (if_channel_1_inc || if_channel_2_inc || if_channel_3_inc) {
                   FSM_status = INCREASE;
                 } else if (baseline_counter > baseline_counter_threshold) {
                   FSM_status = RECOVERY;
@@ -324,8 +327,7 @@ void loop() {
                 Serial.println("INCREASE\n");
                 if (((abs(LL_sum1-delta_sum1) > rec_threshold_1) && if_channel_1_inc) ||
                     ((abs(LL_sum2-delta_sum2) > rec_threshold_2) && if_channel_2_inc) ||
-                    ((abs(LL_sum3-delta_sum3) > rec_threshold_3) && if_channel_3_inc) ||
-                    ((abs(LL_sum4-delta_sum4) > rec_threshold_4) && if_channel_4_inc)) {
+                    ((abs(LL_sum3-delta_sum3) > rec_threshold_3) && if_channel_3_inc)) {
                   FSM_status = RECOVERY;
                   heater_counter = 1;
                   digitalWrite(heater_pin, HIGH);
@@ -338,7 +340,13 @@ void loop() {
             } else {
               dataline += " 0";
             }
-            dataline += " " + String(FSM_status);
+            if (FSM_status == RECOVERY) {
+              dataline += " REC";
+            } else if (FSM_status == INCREASE) {
+              dataline += " INC";
+            } else if (FSM_status == BASELINE) {
+              dataline += " BAS";
+            }
             
             Serial.println(dataline);
 
@@ -369,21 +377,21 @@ void loop() {
       }
     } //END OF WHILE loop   
     client.stop();
-    //if client is disconnected, turn to initial state
-    FSM_status = RECOVERY;
-    heater_counter = 0;
-    baseline_counter = 0;
-    digitalWrite(heater_pin, LOW);
-    lock_flag = 1;
     Serial.println("client disonnected");
-  } else {
     //if client is disconnected, turn to initial state
-    FSM_status = RECOVERY;
-    heater_counter = 0;
-    baseline_counter = 0;
-    digitalWrite(heater_pin, LOW);
-    lock_flag = 1;
+  } else {
+    offline_counter++;
+    if (offline_counter > 400) {
+      FSM_status = RECOVERY;
+      heater_counter = 0;
+      baseline_counter = 0;
+      digitalWrite(heater_pin, LOW);
+      lock_flag = 1;
+      delay(delaytime);
+    }
+    //if client is disconnected, turn to initial state
   }
+  delay(10);
 }
  
 void printWifiStatus() {

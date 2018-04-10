@@ -65,7 +65,6 @@ while True:
 		list1[i] = float(list1[i])
 	
 	list1[18] = int(list1[18])
-	list1[19] = int(list1[19])
 	list1[1] = int(list1[1])
 	for i in range(2,8):
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
