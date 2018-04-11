@@ -17,7 +17,7 @@ files_now.sort()
 file_num = int(files_now[-1])+1 if files_now else 1
 file_num_list = [file_num]
 #device id, hardcoded do not modify
-device_id = 00
+device_id = 1001
 write_file_cycle = 10
 write_files_multiplier = 20
 first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\tSensor4\tSensor4_Filter\tSensor4_LL\tSensor4_Diff\tHeater_Status\tFSM_Status\n"
@@ -71,7 +71,7 @@ while True:
 	list1[1] = int(list1[1])
 	for i in range(2,8):
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
-	teststr = "PROTOTYPE"+"\t"+str(list1[1]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[2])+"\t"+str(list1[3])+"\t"+str(list1[10])+"\t"+str(list1[11])+"\t"+str(list1[4])+"\t"+str(list1[5])+"\t"+str(list1[12])+"\t"+str(list1[13])+"\t"+str(list1[6])+"\t"+str(list1[7])+"\t"+str(list1[14])+"\t"+str(list1[15])+"\t"+str(list1[8])+"\t"+str(list1[9])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+str(list1[19])
+	teststr = "1001"+"\t"+str(list1[1]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[2])+"\t"+str(list1[3])+"\t"+str(list1[10])+"\t"+str(list1[11])+"\t"+str(list1[4])+"\t"+str(list1[5])+"\t"+str(list1[12])+"\t"+str(list1[13])+"\t"+str(list1[6])+"\t"+str(list1[7])+"\t"+str(list1[14])+"\t"+str(list1[15])+"\t"+str(list1[8])+"\t"+str(list1[9])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+str(list1[19])
 	t = time.time() - t0
 
 	data1.append(list1[2])
