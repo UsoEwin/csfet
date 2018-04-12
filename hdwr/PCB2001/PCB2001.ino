@@ -10,8 +10,8 @@
  */
 #include <SPI.h>
 #include <WiFi101.h>
-#define fan_pin 13
-#define heater_pin 6
+#define fan_pin 6
+#define heater_pin 13
 #define tag 2001
 #define delaytime 5000 //milliseconds
 
