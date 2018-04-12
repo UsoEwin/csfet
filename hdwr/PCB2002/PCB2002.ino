@@ -303,7 +303,7 @@ void loop() {
                 if (LL_sum1 <= base_threshold_1 &&
                     LL_sum2 <= base_threshold_2 &&
                     LL_sum3 <= base_threshold_3 && 
-                    LL_sum3 <= base_threshold_3 &&
+                    LL_sum4 <= base_threshold_4 &&
                     lock_flag) {
                   FSM_status = BASELINE;
                   baseline_counter = 0;

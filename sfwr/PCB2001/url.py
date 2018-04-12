@@ -4,7 +4,6 @@ import numpy as np
 import os
 from collections import deque
 import matplotlib
-#matplotlib.use('GTKAgg')
 import tkinter
 import matplotlib.pyplot as plt
 import matplotlib.axes as axe
@@ -120,7 +119,7 @@ while True:
 	list1[18] = int(list1[18])
 	list1[19] = int(list1[19])
 	list1[1] = int(list1[1])
-	for i in range(2,8):
+	for i in range(2,10):
 		list1[i] = list1[i]/1024.0*3.3/0.03 #uA
 	teststr = str(device_id)+"\t"+str(list1[1]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[2])+"\t"+str(list1[3])+"\t"+str(list1[10])+"\t"+str(list1[11])+"\t"+str(list1[4])+"\t"+str(list1[5])+"\t"+str(list1[12])+"\t"+str(list1[13])+"\t"+str(list1[6])+"\t"+str(list1[7])+"\t"+str(list1[14])+"\t"+str(list1[15])+"\t"+str(list1[8])+"\t"+str(list1[9])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+str(list1[19])+"\n"
 	t = time.time() - t0
