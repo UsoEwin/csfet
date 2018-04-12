@@ -25,7 +25,7 @@ first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSe
 #check device id
 print("check id now begin")
 correct_url = "http://192.168.1.1"
-for ip in range(1,256):
+for ip in range(5,256):
 	correct_url = 'http://192.168.1.'+str(ip)
 	print(correct_url+"\n")
 	try:
@@ -47,16 +47,66 @@ last = 0
 
 #plt.axis([0, 21, 0, 0.1])
 plt.ion()
-t_array=deque()
-data1=deque()
-data2=deque()
-data3=deque()
-data4=deque()
+t_array=deque(range(-length+1, 1))
+data1=deque([0]*length)
+data2=deque([0]*length)
+data3=deque([0]*length)
+data4=deque([0]*length)
+data_heater = deque([0]*length)
+data_FSM = deque([0]*length)
+filter1 = deque([0]*length)
+filter2 = deque([0]*length)
+filter3 = deque([0]*length)
+filter4 = deque([0]*length)
 
-filter1 = deque()
-filter2 = deque()
-filter3 = deque()
-filter4 = deque()
+fig = plt.figure()
+
+ax1 = plt.subplot(2,2,1)
+ax1.set_xlim(0.4, 0.6)
+ax1.set_ylim(-1, 0)
+line1b, = plt.plot(t_array,data1,"b.--")
+line1r, = plt.plot(t_array,filter1,"r.--")
+plt.title('Channel 1 Signal')
+plt.ylabel('Current(uA)')
+plt.xlabel('Time(s)')
+
+ax2 = plt.subplot(2,2,2)
+ax2.set_xlim(0.4, 0.6)
+ax2.set_ylim(-1, 0)
+line2b, = plt.plot(t_array,data2,"b.--")
+line2r, = plt.plot(t_array,filter2,"r.--")
+plt.title('Channel 2 Signal')
+plt.ylabel('Current(uA)')
+plt.xlabel('Time(s)')
+
+ax3 = plt.subplot(2,2,3)
+ax3.set_xlim(0.4, 0.6)
+ax3.set_ylim(-1, 0)
+line3b, = plt.plot(t_array,data3,"b.--")
+line3r, = plt.plot(t_array,filter3,"r.--")
+plt.title('Channel 3 Signal')
+plt.ylabel('Current(uA)')
+plt.xlabel('Time(s)')
+
+# ax4 = plt.subplot(3,2,4)
+# ax4.set_xlim(0.4, 0.6)
+# ax4.set_ylim(-1, 0)
+# line4b, = plt.plot(t_array,data4,"b.--")
+# line4r, = plt.plot(t_array,filter4,"r.--")
+# plt.title('Channel 4 Signal')
+# plt.ylabel('Current(uA)')
+# plt.xlabel('Time(s)')
+
+ax5 = plt.subplot(2,2,4)
+ax5.set_xlim(0.4, 0.6)
+ax5.set_ylim(-0.5, 2.5)
+line5_b, = plt.plot(t_array,data_heater,"b.--")
+line5_r, = plt.plot(t_array,data_FSM,"r.--")
+plt.title('Heater(blue,high=1,low=0)\nFSM(red,BAS=1,INC=2,REC=0)\nStatus')
+plt.ylabel('Status')
+plt.xlabel('Time(s)')
+
+plt.tight_layout()
 
 t0 = time.time()
 
@@ -68,93 +118,97 @@ while True:
 		list1[i] = float(list1[i])
 	
 	list1[18] = int(list1[18])
+	list1[19] = int(list1[19])
 	list1[1] = int(list1[1])
 	for i in range(2,8):
 		list1[i] = list1[i]/1024.0*3.3/0.032934 #uA
-	teststr = "PROTOTYPE"+"\t"+str(list1[1]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[2])+"\t"+str(list1[3])+"\t"+str(list1[10])+"\t"+str(list1[11])+"\t"+str(list1[4])+"\t"+str(list1[5])+"\t"+str(list1[12])+"\t"+str(list1[13])+"\t"+str(list1[6])+"\t"+str(list1[7])+"\t"+str(list1[14])+"\t"+str(list1[15])+"\t"+str(list1[8])+"\t"+str(list1[9])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+str(list1[19])
+	teststr = "PROTOTYPE"+"\t"+str(list1[1]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[2])+"\t"+str(list1[3])+"\t"+str(list1[10])+"\t"+str(list1[11])+"\t"+str(list1[4])+"\t"+str(list1[5])+"\t"+str(list1[12])+"\t"+str(list1[13])+"\t"+str(list1[6])+"\t"+str(list1[7])+"\t"+str(list1[14])+"\t"+str(list1[15])+"\t"+str(list1[8])+"\t"+str(list1[9])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+str(list1[19])+"\n"
 	t = time.time() - t0
 
 	data1.append(list1[2])
 	data2.append(list1[4])
 	data3.append(list1[6])
 	data4.append(list1[8])
-
+	data_FSM.append(list1[19])
+	data_heater.append(list1[18])
 	filter1.append(list1[3])
 	filter2.append(list1[5])
 	filter3.append(list1[7])
 	filter4.append(list1[9])
-
 	t_array.append(t)
-	
-	if x>=length:
-		data1.popleft()
-		filter1.popleft()
-		data2.popleft()
-		filter2.popleft()
-		data3.popleft()
-		filter3.popleft()
-		data4.popleft()
-		filter4.popleft()
-		t_array.popleft()
+
+	data1.popleft()
+	filter1.popleft()
+	data2.popleft()
+	filter2.popleft()
+	data3.popleft()
+	filter3.popleft()
+	data4.popleft()
+	filter4.popleft()
+	t_array.popleft()
+	data_FSM.popleft()
+	data_heater.popleft()
 	
 	#plot results
 	try:
-		plt.figure(1)
-		plt.subplot(311)
-		plt.plot(t_array,data1,"b.--")
-		plt.plot(t_array,filter1,"r.--")
-		plt.title('Channel 1 Signal')
-		plt.ylabel('Current(uA)')
-		plt.xlabel('Time(s)')
-		gap = 0.6*(max(data1)-min(data1))
+		line1b.set_xdata(t_array)
+		line1r.set_xdata(t_array)
+		line2b.set_xdata(t_array)
+		line2r.set_xdata(t_array)
+		line3b.set_xdata(t_array)
+		line3r.set_xdata(t_array)
+		#line4b.set_xdata(t_array)
+		#line4r.set_xdata(t_array)
+		line5_r.set_xdata(t_array)
+		line5_b.set_xdata(t_array)
+
+		line1b.set_ydata(data1)
+		line2b.set_ydata(data2)
+		line3b.set_ydata(data3)
+		#line4b.set_ydata(data4)
+		line1r.set_ydata(filter1)
+		line2r.set_ydata(filter2)
+		line3r.set_ydata(filter3)
+		#line4r.set_ydata(filter4)
+		line5_r.set_ydata(data_FSM)
+		line5_b.set_ydata(data_heater)
+
 		if x>length:
-			plt.xlim(t_array[-length],t_array[-1])
-			plt.ylim(min(data1)-gap,max(data1)+gap)
-		
-		plt.subplot(312)
-		plt.plot(t_array,data2,"b.--")
-		plt.plot(t_array,filter2,"r.--")
-		plt.title('Channel 2 Signal')
-		plt.ylabel('Current(uA)')
-		plt.xlabel('Time(s)')
-		gap = 0.6*(max(data2)-min(data2))
-		if x>length:
-			plt.xlim(t_array[-length],t_array[-1])
-			plt.ylim(min(data2)-gap,max(data2)+gap)
-		
-		plt.subplot(313)
-		plt.plot(t_array,data3,"b.--")
-		plt.plot(t_array,filter3,"r.--")
-		plt.title('Channel 3 Signal')
-		plt.ylabel('Current(uA)')
-		plt.xlabel('Time(s)')
-		gap = 0.6*(max(data3)-min(data3))
-		if x>length:
-			plt.xlim(t_array[-length],t_array[-1])
-			plt.ylim(min(data3)-gap,max(data3)+gap)
-		
-		# plt.subplot(224)
-		# plt.plot(t_array,data4,"c.--")
-		# plt.title('Channel 4 Signal')
-		# plt.ylabel('Current(uA)')
-		# plt.xlabel('Time(s)')
-		# gap = 0.6*(max(data4)-min(data4))
-		# if x>length:
-		# 	plt.xlim( t_array[-length],t_array[-1])
-		# 	plt.ylim(min(data4)-gap,max(data4)+gap)
-		# # plt.plot(t_array,data3,"b.--")
-		# # plt.title('Channel 3 Signal')
-		# # plt.ylabel('Current(uA)')
-		# # plt.xlabel('Time(s)')
-		plt.tight_layout()
+			ax1.set_xlim(t_array[-length], t_array[-1])
+			ax2.set_xlim(t_array[-length], t_array[-1])
+			ax3.set_xlim(t_array[-length], t_array[-1])
+			#ax4.set_xlim(t_array[-length], t_array[-1])
+			ax5.set_xlim(t_array[-length], t_array[-1])
+			temp1 = list(data1)+list(filter1)
+			temp2 = list(data2)+list(filter2)
+			temp3 = list(data3)+list(filter3)
+			#temp4 = list(data4)+list(filter4)
+		else:
+			ax1.set_xlim(t_array[-x], t_array[-1])
+			ax2.set_xlim(t_array[-x], t_array[-1])
+			ax3.set_xlim(t_array[-x], t_array[-1])
+			#ax4.set_xlim(t_array[-x], t_array[-1])
+			ax5.set_xlim(t_array[-x], t_array[-1])
+			temp1 = list(data1)[-x:]+list(filter1)[-x:]
+			temp2 = list(data2)[-x:]+list(filter2)[-x:]
+			temp3 = list(data3)[-x:]+list(filter3)[-x:]
+			#temp4 = list(data4)[-x:]+list(filter4)[-x:]
+		gap1 = 0.5*(max(temp1)-min(temp1))
+		gap2 = 0.5*(max(temp2)-min(temp2))
+		gap3 = 0.5*(max(temp3)-min(temp3))
+		#gap4 = 0.6*(max(temp4)-min(temp4))
+		ax1.set_ylim(min(temp1)-gap1,max(temp1)+gap1)
+		ax2.set_ylim(min(temp2)-gap2,max(temp2)+gap2)
+		ax3.set_ylim(min(temp3)-gap3,max(temp3)+gap3)
+		#ax4.set_ylim(min(temp4)-gap4,max(temp4)+gap4)
+
 		plt.pause(0.05)
 
 	except Exception as e:
 		file.close()
+		del fig
 		break
 
-	teststr = teststr + "\n"
-	
 	if curr != last:
 		file.write(teststr)
 	#print(len(t_array))
@@ -190,8 +244,3 @@ for i in range(1, len(file_num_list)):
 	file.close()
 	os.remove(folder_name+str(file_num_list[i]).zfill(6))
 print("Exit Normally")
-
-
-
-
-
