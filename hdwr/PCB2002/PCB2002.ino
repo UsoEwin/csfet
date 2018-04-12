@@ -10,12 +10,12 @@
  */
 #include <SPI.h>
 #include <WiFi101.h>
-#define fan_pin 6
-#define heater_pin 13
-#define tag 1001
+#define fan_pin 13
+#define heater_pin 6
+#define tag 2002
 #define delaytime 5000 //milliseconds
 
-#define num_average 30
+#define num_average 50
 #define alpha 0.15
 #define LLlength 8
 #define ratio 100.00
@@ -24,26 +24,26 @@
 #define BASELINE 1
 #define INCREASE 2
 
-#define baseline_counter_threshold 600 // 1000*4 seconds
+#define baseline_counter_threshold 2000 // 2000*1.4 seconds
 #define heater_counter_threshold 15 //
 
-int base_threshold_1 = 100; //experimental value (variable)
-int inc_threshold_1 = 90; //experimental value (variable)
+int base_threshold_1 = 80; //experimental value (variable)
+int inc_threshold_1 = 70; //experimental value (variable)
 int rec_threshold_1 = 500; //experimental value (variable)
 bool if_channel_1_inc = false;
 
-int base_threshold_2 = 100; //experimental value (variable)
-int inc_threshold_2 = 90; //experimental value (variable)
+int base_threshold_2 = 80; //experimental value (variable)
+int inc_threshold_2 = 70; //experimental value (variable)
 int rec_threshold_2 = 500; //experimental value (variable)
 bool if_channel_2_inc = false;
 
-int base_threshold_3 = 100; //experimental value (variable)
-int inc_threshold_3 = 90; //experimental value (variable)
+int base_threshold_3 = 80; //experimental value (variable)
+int inc_threshold_3 = 70; //experimental value (variable)
 int rec_threshold_3 = 500; //experimental value (variable)
 bool if_channel_3_inc = false;
 
-int base_threshold_4 = 100; //experimental value (variable)
-int inc_threshold_4 = 90; //experimental value (variable)
+int base_threshold_4 = 80; //experimental value (variable)
+int inc_threshold_4 = 70; //experimental value (variable)
 int rec_threshold_4 = 500; //experimental value (variable)
 bool if_channel_4_inc = false;
 
@@ -51,7 +51,6 @@ char ssid[] = "NETGEAR45";      //  your network SSID (name)
 char pass[] = "modernboat463";   // your network password
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
 int i = 0;
-bool val = true;
 /*Sensor pin define*/
 String dataline="";
 unsigned long data_index = 0;
@@ -85,7 +84,7 @@ double delta_sum1 = 0.0;
 double pre_delta1 = 0.0;
 double LL_sum1 = 0.0;
 double pre_LL1 = 0.0;
-double delta_sum1_diff = 0.0;
+double LL_sum1_diff = 0.0;
 
 double delta2[LLlength];
 double LL2[LLlength];
@@ -97,7 +96,7 @@ double delta_sum2 = 0.0;
 double pre_delta2 = 0.0;
 double LL_sum2 = 0.0;
 double pre_LL2 = 0.0;
-double delta_sum2_diff = 0.0;
+double LL_sum2_diff = 0.0;
 
 double delta3[LLlength];
 double LL3[LLlength];
@@ -109,7 +108,7 @@ double delta_sum3 = 0.0;
 double pre_delta3 = 0.0;
 double LL_sum3 = 0.0;
 double pre_LL3 = 0.0;
-double delta_sum3_diff = 0.0;
+double LL_sum3_diff = 0.0;
 
 double delta4[LLlength];
 double LL4[LLlength];
@@ -121,7 +120,7 @@ double delta_sum4 = 0.0;
 double pre_delta4 = 0.0;
 double LL_sum4 = 0.0;
 double pre_LL4 = 0.0;
-double delta_sum4_diff = 0.0;
+double LL_sum4_diff = 0.0;
 
 unsigned long pre_time;
 unsigned long cur_time = 0;
@@ -217,6 +216,8 @@ void loop() {
             d4 = (isnan(d4)) ? s4: s4*alpha+(1-alpha)*d4;
             cur_time = millis();
 
+            Serial.println("Delta-Time = " + String(cur_time-pre_time));
+
             dataline = String(tag)+ " "+String(data_index) +" "+ String(s1)+" "+ String(d1) +" "+ String(s2)+" "+ String(d2) +" "+ String(s3)+" "+ String(d3)+" "+ String(s4)+" "+ String(d4)+" ";
             if (!isnan(pre_d1)) {
               *p_LL_end1 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d1-pre_d1),2));
@@ -225,10 +226,14 @@ void loop() {
               *p_LL_end4 = sqrt(pow((cur_time - pre_time)/1000.00,2) + pow(ratio*(d4-pre_d4),2));
               
               //Serial.print(String(sqrt(pow((cur_time - pre_time),2) + pow(ratio*(d1-pre_d1),2)))+" Here is it\n");
-              LL_sum1 = LL_sum1 + *p_LL_end1 - pre_LL1;
-              LL_sum2 = LL_sum2 + *p_LL_end2 - pre_LL2;
-              LL_sum3 = LL_sum3 + *p_LL_end3 - pre_LL3;
-              LL_sum4 = LL_sum4 + *p_LL_end4 - pre_LL4;
+              LL_sum1_diff = *p_LL_end1 - pre_LL1;
+              LL_sum1 = LL_sum1 + LL_sum1_diff;
+              LL_sum2_diff = *p_LL_end2 - pre_LL2;
+              LL_sum2 = LL_sum2 + LL_sum2_diff;
+              LL_sum3_diff = *p_LL_end3 - pre_LL3;
+              LL_sum3 = LL_sum3 + LL_sum3_diff;
+              LL_sum4_diff = *p_LL_end4 - pre_LL4;
+              LL_sum4 = LL_sum4 + LL_sum4_diff;
               
               p_LL_end1 = LL1 + (((p_LL_end1-LL1)+1) % LLlength);
               p_LL_end2 = LL2 + (((p_LL_end2-LL2)+1) % LLlength);
@@ -240,14 +245,10 @@ void loop() {
               *p_delta_end3 = ratio*(d3-pre_d3);
               *p_delta_end4 = ratio*(d4-pre_d4);
               
-              delta_sum1_diff = *p_delta_end1 - pre_delta1;
-              delta_sum1 = delta_sum1 + delta_sum1_diff;
-              delta_sum2_diff = *p_delta_end2 - pre_delta2;
-              delta_sum2 = delta_sum2 + delta_sum2_diff;
-              delta_sum3_diff = *p_delta_end3 - pre_delta3;
-              delta_sum3 = delta_sum3 + delta_sum3_diff;
-              delta_sum4_diff = *p_delta_end4 - pre_delta4;
-              delta_sum4 = delta_sum4 + delta_sum4_diff;
+              delta_sum1 = delta_sum1 + *p_delta_end1 - pre_delta1;
+              delta_sum2 = delta_sum2 + *p_delta_end2 - pre_delta2;
+              delta_sum3 = delta_sum3 + *p_delta_end3 - pre_delta3;
+              delta_sum4 = delta_sum4 + *p_delta_end4 - pre_delta4;
 
               p_delta_end1 = delta1 + (((p_delta_end1-delta1)+1) % LLlength);
               p_delta_end2 = delta2 + (((p_delta_end2-delta2)+1) % LLlength);
@@ -299,9 +300,11 @@ void loop() {
                 } else if (heater_counter > 0) {
                   heater_counter++;
                 }
-                if (abs(delta_sum1) <= base_threshold_1 &&
-                    abs(delta_sum2) <= base_threshold_2 &&
-                    abs(delta_sum3) <= base_threshold_3 && lock_flag) {
+                if (LL_sum1 <= base_threshold_1 &&
+                    LL_sum2 <= base_threshold_2 &&
+                    LL_sum3 <= base_threshold_3 && 
+                    LL_sum3 <= base_threshold_3 &&
+                    lock_flag) {
                   FSM_status = BASELINE;
                   baseline_counter = 0;
                 }
@@ -309,11 +312,11 @@ void loop() {
               case BASELINE:
                 Serial.println("BASELINE\n");
                 baseline_counter++;
-                if_channel_1_inc = (abs(delta_sum1_diff) > inc_threshold_1);
-                if_channel_2_inc = (abs(delta_sum2_diff) > inc_threshold_2);
-                if_channel_3_inc = (abs(delta_sum3_diff) > inc_threshold_3);
-                if_channel_4_inc = (abs(delta_sum4_diff) > inc_threshold_4);
-                if (if_channel_1_inc || if_channel_2_inc || if_channel_3_inc) {
+                if_channel_1_inc = (LL_sum1_diff > inc_threshold_1);
+                if_channel_2_inc = (LL_sum2_diff > inc_threshold_2);
+                if_channel_3_inc = (LL_sum3_diff > inc_threshold_3);
+                if_channel_4_inc = (LL_sum4_diff > inc_threshold_4);
+                if (if_channel_1_inc || if_channel_2_inc || if_channel_3_inc || if_channel_4_inc) {
                   FSM_status = INCREASE;
                 } else if (baseline_counter > baseline_counter_threshold) {
                   FSM_status = RECOVERY;
@@ -327,7 +330,8 @@ void loop() {
                 Serial.println("INCREASE\n");
                 if (((abs(LL_sum1-delta_sum1) > rec_threshold_1) && if_channel_1_inc) ||
                     ((abs(LL_sum2-delta_sum2) > rec_threshold_2) && if_channel_2_inc) ||
-                    ((abs(LL_sum3-delta_sum3) > rec_threshold_3) && if_channel_3_inc)) {
+                    ((abs(LL_sum3-delta_sum3) > rec_threshold_3) && if_channel_3_inc) ||
+                    ((abs(LL_sum4-delta_sum4) > rec_threshold_4) && if_channel_4_inc)) {
                   FSM_status = RECOVERY;
                   heater_counter = 1;
                   digitalWrite(heater_pin, HIGH);
@@ -341,11 +345,11 @@ void loop() {
               dataline += " 0";
             }
             if (FSM_status == RECOVERY) {
-              dataline += " REC";
+              dataline += " "+String(RECOVERY);
             } else if (FSM_status == INCREASE) {
-              dataline += " INC";
+              dataline += " "+String(INCREASE);
             } else if (FSM_status == BASELINE) {
-              dataline += " BAS";
+              dataline += " "+String(BASELINE);
             }
             
             Serial.println(dataline);
@@ -381,15 +385,64 @@ void loop() {
     //if client is disconnected, turn to initial state
   } else {
     offline_counter++;
-    if (offline_counter > 400) {
+    //if client is disconnected, turn to initial state, delay more time
+    if (offline_counter == 400) {
+      Serial.println("disconnected from client\n\n\n\n\n\n");
       FSM_status = RECOVERY;
       heater_counter = 0;
       baseline_counter = 0;
       digitalWrite(heater_pin, LOW);
       lock_flag = 1;
+      data_index = 0;
+      d1 = NAN;
+      d2 = NAN;
+      d3 = NAN;
+      d4 = NAN;
+      cur_time = 0;
+
+      p_delta_start1 = delta1;
+      p_delta_end1 = delta1;
+      p_LL_start1 = LL1;
+      p_LL_end1 = LL1;
+      delta_sum1 = 0.0;
+      pre_delta1 = 0.0;
+      LL_sum1 = 0.0;
+      pre_LL1 = 0.0;
+      LL_sum1_diff = 0.0;
+
+      p_delta_start2 = delta2;
+      p_delta_end2 = delta2;
+      p_LL_start2 = LL2;
+      p_LL_end2 = LL2;
+      delta_sum2 = 0.0;
+      pre_delta2 = 0.0;
+      LL_sum2 = 0.0;
+      pre_LL2 = 0.0;
+      LL_sum2_diff = 0.0;
+
+      p_delta_start3 = delta3;
+      p_delta_end3 = delta3;
+      p_LL_start3 = LL3;
+      p_LL_end3 = LL3;
+      delta_sum3 = 0.0;
+      pre_delta3 = 0.0;
+      LL_sum3 = 0.0;
+      pre_LL3 = 0.0;
+      LL_sum3_diff = 0.0;
+
+      p_delta_start4 = delta4;
+      p_delta_end4 = delta4;
+      p_LL_start4 = LL4;
+      p_LL_end4 = LL4;
+      delta_sum4 = 0.0;
+      pre_delta4 = 0.0;
+      LL_sum4 = 0.0;
+      pre_LL4 = 0.0;
+      LL_sum4_diff = 0.0;
+    }
+    if (offline_counter >= 400) {
       delay(delaytime);
     }
-    //if client is disconnected, turn to initial state
   }
   delay(10);
 }
