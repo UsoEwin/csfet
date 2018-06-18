@@ -47,8 +47,8 @@ int inc_threshold_4 = 70; //experimental value (variable)
 int rec_threshold_4 = 500; //experimental value (variable)
 bool if_channel_4_inc = false;
 
-char ssid[] = "NETGEAR45";      //  your network SSID (name)
-char pass[] = "modernboat463";   // your network password
+char ssid[] = "NETGEAR40";      //  your network SSID (name)
+char pass[] = "pastelskates248";   // your network password
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
 int i = 0;
 /*Sensor pin define*/
