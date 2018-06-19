@@ -196,7 +196,7 @@ while True:
 		gap1 = 0.5*(max(temp1)-min(temp1))
 		gap2 = 0.5*(max(temp2)-min(temp2))
 		gap3 = 0.5*(max(temp3)-min(temp3))
-		#gap4 = 0.6*(max(temp4)-min(temp4))
+		#gap4 = 0.5*(max(temp4)-min(temp4))
 		ax1.set_ylim(min(temp1)-gap1,max(temp1)+gap1)
 		ax2.set_ylim(min(temp2)-gap2,max(temp2)+gap2)
 		ax3.set_ylim(min(temp3)-gap3,max(temp3)+gap3)
