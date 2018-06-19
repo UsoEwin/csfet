@@ -25,7 +25,7 @@ first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSe
 #check device id
 print("check id now begin")
 correct_url = "http://192.168.1.1"
-for ip in range(5,256):
+for ip in range(2,256):
 	correct_url = 'http://192.168.1.'+str(ip)
 	print(correct_url+"\n")
 	try:
