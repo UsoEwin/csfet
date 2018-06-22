@@ -37,23 +37,23 @@
 Adafruit_SHT31 sht31 = Adafruit_SHT31();
 
 int base_threshold_1 = 80; //experimental value (variable)
-int inc_threshold_1 = 70; //experimental value (variable)
-int rec_threshold_1 = 500; //experimental value (variable)
+int inc_threshold_1 = 65; //experimental value (variable)
+int rec_threshold_1 = 90; //experimental value (variable)
 bool if_channel_1_inc = false;
 
 int base_threshold_2 = 80; //experimental value (variable)
-int inc_threshold_2 = 70; //experimental value (variable)
-int rec_threshold_2 = 500; //experimental value (variable)
+int inc_threshold_2 = 65; //experimental value (variable)
+int rec_threshold_2 = 90; //experimental value (variable)
 bool if_channel_2_inc = false;
 
 int base_threshold_3 = 80; //experimental value (variable)
-int inc_threshold_3 = 70; //experimental value (variable)
-int rec_threshold_3 = 500; //experimental value (variable)
+int inc_threshold_3 = 65; //experimental value (variable)
+int rec_threshold_3 = 90; //experimental value (variable)
 bool if_channel_3_inc = false;
 
 int base_threshold_4 = 80; //experimental value (variable)
-int inc_threshold_4 = 70; //experimental value (variable)
-int rec_threshold_4 = 500; //experimental value (variable)
+int inc_threshold_4 = 65; //experimental value (variable)
+int rec_threshold_4 = 90; //experimental value (variable)
 bool if_channel_4_inc = false;
 
 //char ssid[] = "NETGEAR40";      //  your network SSID (name)

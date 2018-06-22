@@ -25,26 +25,26 @@
 #define INCREASE 2
 
 #define baseline_counter_threshold 2000 // 2000*1.4 seconds
-#define heater_counter_threshold 15 //
+#define heater_counter_threshold 36 //
 
 int base_threshold_1 = 80; //experimental value (variable)
 int inc_threshold_1 = 65; //experimental value (variable)
-int rec_threshold_1 = 90; //experimental value (variable)
+int rec_threshold_1 = 170; //experimental value (variable)
 bool if_channel_1_inc = false;
 
 int base_threshold_2 = 80; //experimental value (variable)
 int inc_threshold_2 = 65; //experimental value (variable)
-int rec_threshold_2 = 90; //experimental value (variable)
+int rec_threshold_2 = 170; //experimental value (variable)
 bool if_channel_2_inc = false;
 
 int base_threshold_3 = 80; //experimental value (variable)
 int inc_threshold_3 = 65; //experimental value (variable)
-int rec_threshold_3 = 90; //experimental value (variable)
+int rec_threshold_3 = 170; //experimental value (variable)
 bool if_channel_3_inc = false;
 
 int base_threshold_4 = 80; //experimental value (variable)
 int inc_threshold_4 = 65; //experimental value (variable)
-int rec_threshold_4 = 90; //experimental value (variable)
+int rec_threshold_4 = 170; //experimental value (variable)
 bool if_channel_4_inc = false;
 
 char ssid[] = "NETGEAR40";      //  your network SSID (name)
