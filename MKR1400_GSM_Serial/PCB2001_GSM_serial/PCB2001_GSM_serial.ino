@@ -19,6 +19,9 @@
 #include <WiFi101.h>
 #define fan_pin 6
 #define heater_pin 13
+#define V_GS(X) (int)(X*(-78.102)+155.36)
+#define vgs 0
+// typically vgs from -1.2V to 1.95V, unit is Volt
 #define tag 2001
 #define delaytime 5000 //milliseconds
 
@@ -144,6 +147,10 @@ unsigned long offline_counter = 0;
 //int status = WL_IDLE_STATUS;
 //WiFiServer server(80);
 void setup() {
+  analogWrite(A0,max(min(V_GS(vgs),255),0));
+  pinMode(fan_pin, OUTPUT);      // set the LED pin mode
+  pinMode(heater_pin, OUTPUT);
+  digitalWrite(heater_pin, LOW);
   Serial.begin(9600);      // initialize serial communication
   //Serial.print("Start Serial ");
   while (!Serial)
@@ -154,14 +161,12 @@ void setup() {
     Serial.println("Couldn't find SHT31 Sensor");
     while (1) delay(1);
   }
-  pinMode(fan_pin, OUTPUT);      // set the LED pin mode
-  pinMode(heater_pin, OUTPUT);
-  digitalWrite(heater_pin, LOW);
+  
   // Check for the presence of the shield
 //  Serial.print("WiFi101 shield: ");
 
   // setup for the DAC
-  analogWrite(A0,110);
+  
   
 /*  if (WiFi.status() == WL_NO_SHIELD) {
     Serial.println("NOT PRESENT");
