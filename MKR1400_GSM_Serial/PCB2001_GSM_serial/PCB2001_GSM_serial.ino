@@ -150,7 +150,21 @@ void setup() {
   analogWrite(A0,max(min(V_GS(vgs),255),0));
   pinMode(fan_pin, OUTPUT);      // set the LED pin mode
   pinMode(heater_pin, OUTPUT);
+  pinMode(0,OUTPUT);
+  pinMode(1,OUTPUT);
+  pinMode(2,OUTPUT);
+  pinMode(3,OUTPUT);
+  pinMode(4,OUTPUT);
+  pinMode(5,OUTPUT);
+  pinMode(6,OUTPUT);
   digitalWrite(heater_pin, LOW);
+  digitalWrite(0, LOW);
+  digitalWrite(1, LOW);
+  digitalWrite(2, LOW);
+  digitalWrite(3, LOW);
+  digitalWrite(4, LOW);
+  digitalWrite(5, LOW);
+  digitalWrite(6, LOW);
   Serial.begin(9600);      // initialize serial communication
   //Serial.print("Start Serial ");
   while (!Serial)

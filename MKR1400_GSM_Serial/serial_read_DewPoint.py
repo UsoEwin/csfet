@@ -22,7 +22,7 @@ device_id = 2001
 
 write_file_cycle = 10
 write_files_multiplier = 20
-first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\tSensor4\tSensor4_Filter\tSensor4_LL\tSensor4_Diff\tHeater_Status\tFSM_Status\tTemp\tHumidity\n"
+first_line = "Dev_id\tIndex\tDate\tTime\tSensor1\tSensor1_Filter\tSensor1_LL\tSensor1_Diff\tSensor2\tSensor2_Filter\tSensor2_LL\tSensor2_Diff\tSensor3\tSensor3_Filter\tSensor3_LL\tSensor3_Diff\tSensor4\tSensor4_Filter\tSensor4_LL\tSensor4_Diff\tHeater_Status\tFSM_Status\tTemp\tHumidity\tTemp_Delta\n"
 
 try:
 	print("starting connection: ....\n")
@@ -111,7 +111,7 @@ line5_b, = plt.plot(t_array,data_heater,"b.--")
 line5_r, = plt.plot(t_array,data_FSM,"r.--")
 ax5.set_xlim(0.4, 0.6)
 ax5.set_ylim(-0.5,5.5)
-plt.title('Heater(blue,high=1,low=0)\nFSM(red,BAS=1,INC=2,REC=0)\nStatus')
+plt.title('Heater(blue,high=5,low=0)\nFSM(red,BAS=1,INC=2,REC=0)\nStatus')
 plt.ylabel('Status')
 plt.xlabel('Time(s)')
 
@@ -151,8 +151,8 @@ while True:
 	#testval =str(arduino.readline())[2:-5]
 	#testval = arduino.readline().decode().rstrip()
 	# arduino.reset_input_buffer()
-	testval = arduino.read(88).rstrip()
-	list1 = [testval[4 * i: 4 * (i + 1)] for i in range(0,22)]
+	testval = arduino.read(92).rstrip()
+	list1 = [testval[4 * i: 4 * (i + 1)] for i in range(0,23)]
 	#print(list1)
 	#print(testval)
 	#list1 = testval.split()
@@ -164,19 +164,20 @@ while True:
 	list1[17] = struct.unpack('<L',list1[17])[0]
 	list1[18] = struct.unpack('<L',list1[18])[0]
 
-	#Temp+Humidity
+	#Temp+Humidity+Temp_Delta
 	list1[19] = struct.unpack('f',list1[19])[0]
 	list1[20] = struct.unpack('f',list1[20])[0]
+	list1[21] = struct.unpack('f',list1[21])[0]
 
 	#tag
-	list1[21] = struct.unpack('<L',list1[21])[0]
+	list1[22] = struct.unpack('<L',list1[22])[0]
 
 	#index
 	list1[0] = struct.unpack('<L',list1[0])[0]
 	for i in range(1,9):
 		list1[i] = list1[i]/1024.0*3.3/0.03 #uA
 	
-	teststr = str(device_id)+"\t"+str(list1[0]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[1])+"\t"+str(list1[2])+"\t"+str(list1[9])+"\t"+str(list1[10])+"\t"+str(list1[3])+"\t"+str(list1[4])+"\t"+str(list1[11])+"\t"+str(list1[12])+"\t"+str(list1[5])+"\t"+str(list1[6])+"\t"+str(list1[13])+"\t"+str(list1[14])+"\t"+str(list1[7])+"\t"+str(list1[8])+"\t"+str(list1[15])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+ str(list1[19])+"\t"+str(list1[20])+"\n"
+	teststr = str(device_id)+"\t"+str(list1[0]).zfill(6)+"\t"+time.strftime('%x\t%X')+"\t"+str(list1[1])+"\t"+str(list1[2])+"\t"+str(list1[9])+"\t"+str(list1[10])+"\t"+str(list1[3])+"\t"+str(list1[4])+"\t"+str(list1[11])+"\t"+str(list1[12])+"\t"+str(list1[5])+"\t"+str(list1[6])+"\t"+str(list1[13])+"\t"+str(list1[14])+"\t"+str(list1[7])+"\t"+str(list1[8])+"\t"+str(list1[15])+"\t"+str(list1[16])+"\t"+str(list1[17])+"\t"+str(list1[18])+"\t"+ str(list1[19])+"\t"+str(list1[20])+"\t"+str(list1[21])+"\n"
 	t = time.time() - t0
 
 	data1.append(list1[1])
